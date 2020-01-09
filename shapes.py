@@ -1,7 +1,4 @@
-### #!/usr/bin/python3
-# -*- coding: utf-8 -*-
 import sys
-import uuid
 import math
 
 this_module = sys.modules[__name__]
@@ -15,10 +12,14 @@ class Shape():
     """
     Base shape class
     """
-    shape_id = None
+    shape_id = 0
 
     def __init__(self, *args, **kwargs):
-        self.shape_id = uuid.uuid4()
+        """
+        Increment base object counter
+        """
+        self.shape_id = Shape.shape_id
+        Shape.shape_id += 1
 
     @staticmethod
     def get_shape(shape_type, *args):
