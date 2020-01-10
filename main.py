@@ -9,16 +9,34 @@ import queue
 
 threadLock = threading.Lock()
 q = queue.Queue()
-
+threads = []
+# max_area = max_circumference = None
 
 def parse_file(file):
     with open(file) as fp:
         for line in fp:
             try:
-                s = shapes.Shape.get_shape(*line.split())
-                print(s)
-            except shapes.ValidationException as e:
-                print(e)
+                with threadLock:
+                    s = shapes.Shape.get_shape(*line.split())
+                    q.put(s)
+            except shapes.ValidationException:
+                #TODO: log
+                pass
+
+
+def process_queue():
+    while True:
+        item = q.get()
+        if not item:
+            break
+        area = item.calc_area()
+        circumference = item.calc_circumference()
+        # max values
+        # if circumference > max_circumference:
+        #     max_circumference = circumference
+        print("{id}: {shape}; area: {area}, circumference: {circumference}".format(
+            id=item.shape_id, shape=item, area=area, circumference=circumference))
+        q.task_done()
 
 
 def dir_path(string):
@@ -38,12 +56,24 @@ def main():
         sys.exit()
 
     for file in glob.glob(os.path.join(args.path, '*.txt')):
-        parse_file(file)
-    # s = shapes.Shape.get_shape('square', 2)
-    # s3 = shapes.Shape.get_shape('square', 3)
-    # s2 = shapes.Shape.get_shape('circle', 2)
-    # print(s.calc_area())
-    # print("{}, {}".format(s.shape_id, s2.shape_id))
+        t = threading.Thread(target=parse_file, args=(file,))
+        t.start()
+        threads.append(t)
+        # parse_file(file)
+
+    # processing thread
+    tw = threading.Thread(target=process_queue)
+    tw.start()
+
+    # parsing files stops
+    for t in threads:
+        t.join()
+        q.put(None) # stops processing thread
+
+    # block until all tasks are done
+    tw.join()
+
+    print("Max")
 
 
 if __name__ == '__main__':
