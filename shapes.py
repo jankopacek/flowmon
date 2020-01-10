@@ -3,10 +3,12 @@ import math
 
 this_module = sys.modules[__name__]
 
+
 class ValidationException(Exception):
     """
     ValidationException
     """
+
 
 class Shape():
     """
@@ -30,9 +32,10 @@ class Shape():
         try:
             return getattr(this_module, shape_type.capitalize())(*args)
         except AttributeError:
-            raise ValidationException("No such shape defined: {}".format(shape_type))
+            raise ValidationException(
+                "No such shape defined: {}".format(shape_type))
         except TypeError as e:
-            raise ValidationException("Bad arguments: {}".format(e))
+            raise ValidationException("Bad arguments {}: {}".format(shape_type,e))
 
     def get_positive_float(self, param):
         try:
@@ -55,6 +58,7 @@ class Shape():
         """
         raise NotImplementedError
 
+
 class Square(Shape):
     """
     Square shape
@@ -65,11 +69,15 @@ class Square(Shape):
         super().__init__()
         self.line_length = self.get_positive_float(line_length)
 
+    def __str__(self):
+        return "Square ({})".format(self.line_length)
+
     def calc_circumference(self):
         return 4 * self.line_length
 
     def calc_area(self):
         return self.line_length ** 2
+
 
 class Rectangle(Shape):
     """
@@ -82,11 +90,15 @@ class Rectangle(Shape):
         self.line_a_length = self.get_positive_float(line_a_length)
         self.line_b_length = self.get_positive_float(line_b_length)
 
+    def __str__(self):
+        return "Rectangle ({}, {})".format(self.line_a_length, self.line_b_length)
+
     def calc_circumference(self):
         return 2 * self.line_a_length + 2 * self.line_b_length
 
     def calc_area(self):
         return self.line_a_length * self.line_b_length
+
 
 class Triangle(Shape):
     """
@@ -100,12 +112,16 @@ class Triangle(Shape):
         self.line_b_length = self.get_positive_float(line_b_length)
         self.line_c_length = self.get_positive_float(line_c_length)
 
+    def __str__(self):
+        return "Triangle ({}, {}, {})".format(self.line_a_length, self.line_b_length, self.line_c_length)
+
     def calc_circumference(self):
         return self.line_a_length + self.line_b_length + self.line_c_length
 
     def calc_area(self):
         s = self.calc_circumference()/2
         return math.sqrt(s * (s - self.line_a_length) * (s - self.line_b_length) * (s - self.line_c_length))
+
 
 class Circle(Shape):
     """
@@ -116,6 +132,9 @@ class Circle(Shape):
     def __init__(self, radius, *args, **kwargs):
         super().__init__()
         self.radius = self.get_positive_float(radius)
+
+    def __str__(self):
+        return "Circle ({})".format(self.radius)
 
     def calc_circumference(self):
         return 2 * math.pi * self.radius
