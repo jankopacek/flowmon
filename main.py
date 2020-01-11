@@ -10,7 +10,7 @@ import queue
 threadLock = threading.Lock()
 q = queue.Queue()
 threads = []
-# max_area = max_circumference = None
+max_area = max_circumference = (0, None)
 
 def parse_file(file):
     with open(file) as fp:
@@ -25,6 +25,8 @@ def parse_file(file):
 
 
 def process_queue():
+    global max_area
+    global max_circumference
     while True:
         item = q.get()
         if not item:
@@ -32,8 +34,11 @@ def process_queue():
         area = item.calc_area()
         circumference = item.calc_circumference()
         # max values
-        # if circumference > max_circumference:
-        #     max_circumference = circumference
+        #TODO: more equal objects
+        if circumference > max_circumference[0]:
+            max_circumference = (circumference, item)
+        if area > max_area[0]:
+            max_area = (area, item)
         print("{id}: {shape}; area: {area}, circumference: {circumference}".format(
             id=item.shape_id, shape=item, area=area, circumference=circumference))
         q.task_done()
@@ -73,8 +78,9 @@ def main():
     # block until all tasks are done
     tw.join()
 
-    print("Max")
-
+    print("Max values:")
+    print("Area: {} (shape: {})".format(*max_area))
+    print("Circumference: {} (shape: {})".format(*max_circumference))
 
 if __name__ == '__main__':
     main()
